@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mental Mods Academy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:       #1a1612;
+    --bark:      #2e2520;
+    --mod:      #4a3728;
+    --pelt:      #7a5c44;
+    --sand:      #c4a882;
+    --cream:     #f0e8db;
+    --fog:       #f8f3ed;
+    --gold:      #c9973a;
+    --gold-dim:  #a87830;
+    --red:       #8b3a2a;
+    --green:     #3a6644;
+    --white:     #fdfaf6;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--fog);
+    color: var(--ink);
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2.5rem;
+    height: 64px;
+    background: rgba(248,243,237,0.88);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(196,168,130,0.25);
+  }
+  .nav-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.35rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--mod);
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .nav-logo span { color: var(--gold); }
+  .nav-links { display: flex; gap: 2rem; }
+  .nav-links a {
+    font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--pelt); text-decoration: none; font-weight: 500;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--gold); }
+  .nav-cta {
+    background: var(--mod); color: var(--cream);
+    border: none; padding: 0.5rem 1.25rem;
+    font-family: 'DM Sans', sans-serif; font-size: 0.78rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .nav-cta:hover { background: var(--gold); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: grid; place-items: center;
+    padding: 8rem 2rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 70% 60% at 75% 40%, rgba(201,151,58,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 50% at 20% 70%, rgba(122,92,68,0.07) 0%, transparent 70%);
+  }
+  .hero-texture {
+    position: absolute; inset: 0; z-index: 0;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h60v60H0z' fill='none'/%3E%3Ccircle cx='30' cy='30' r='1' fill='%234a3728'/%3E%3C/svg%3E");
+    background-size: 30px 30px;
+  }
+  .hero-inner { position: relative; z-index: 1; max-width: 860px; text-align: center; }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--gold); font-weight: 500; margin-bottom: 1.8rem;
+  }
+  .hero-eyebrow::before, .hero-eyebrow::after {
+    content: ''; display: block; width: 28px; height: 1px; background: var(--gold);
+  }
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(3.2rem, 7vw, 6.4rem);
+    font-weight: 300;
+    line-height: 1.06;
+    color: var(--bark);
+    margin-bottom: 1.6rem;
+  }
+  .hero-title em { font-style: italic; color: var(--gold); }
+  .hero-sub {
+    font-size: 1.05rem; font-weight: 300;
+    color: var(--pelt); line-height: 1.75;
+    max-width: 560px; margin: 0 auto 2.8rem;
+  }
+  .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--mod); color: var(--cream);
+    border: none; padding: 0.85rem 2rem;
+    font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+    letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
+    text-decoration: none; display: inline-block;
+  }
+  .btn-primary:hover { background: var(--gold); transform: translateY(-1px); }
+  .btn-outline {
+    background: transparent; color: var(--mod);
+    border: 1px solid var(--sand); padding: 0.85rem 2rem;
+    font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+    letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500;
+    cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block;
+  }
+  .btn-outline:hover { border-color: var(--mod); transform: translateY(-1px); }
+
+  .hero-scroll-hint {
+    position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+    font-size: 0.68rem; letter-spacing: 0.18em; color: var(--sand);
+    text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+  .hero-scroll-hint::after { content: '↓'; font-size: 1rem; }
+  @keyframes pulse { 0%,100%{opacity:0.5} 50%{opacity:1} }
+
+  /* ── SECTION SHARED ── */
+  section { padding: 6rem 2rem; }
+  .section-label {
+    font-size: 0.68rem; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--gold); font-weight: 500; margin-bottom: 0.8rem;
+  }
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 300; color: var(--bark); line-height: 1.15; margin-bottom: 1rem;
+  }
+  .section-title em { font-style: italic; color: var(--gold); }
+  .section-body {
+    font-size: 0.95rem; color: var(--pelt); line-height: 1.8; max-width: 520px;
+  }
+  .container { max-width: 1120px; margin: 0 auto; }
+
+  /* ── PILLARS ── */
+  .pillars { background: var(--white); }
+  .pillars-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 0;
+    margin-top: 4rem;
+    border: 1px solid rgba(196,168,130,0.3);
+  }
+  .pillar {
+    padding: 2.5rem;
+    border-right: 1px solid rgba(196,168,130,0.3);
+    position: relative; overflow: hidden;
+    transition: background 0.3s;
+  }
+  .pillar:last-child { border-right: none; }
+  .pillar:hover { background: var(--fog); }
+  .pillar-icon {
+    font-size: 1.8rem; margin-bottom: 1.2rem; display: block;
+  }
+  .pillar-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.15em;
+    color: var(--sand); margin-bottom: 0.6rem;
+  }
+  .pillar h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem; font-weight: 400; color: var(--bark);
+    margin-bottom: 0.75rem;
+  }
+  .pillar p {
+    font-size: 0.88rem; color: var(--pelt); line-height: 1.7;
+  }
+  .pillar-accent {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+  .pillar:hover .pillar-accent { transform: scaleX(1); }
+
+  /* ── PHILOSOPHY ── */
+  .philosophy {
+    background: var(--mod);
+    color: var(--cream);
+  }
+  .philosophy-inner {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: center;
+  }
+  .philosophy .section-label { color: var(--sand); }
+  .philosophy .section-title { color: var(--cream); }
+  .philosophy .section-body { color: rgba(240,232,219,0.75); }
+  .philosophy-quote {
+    border-left: 2px solid var(--gold);
+    padding-left: 1.5rem;
+    margin-top: 2rem;
+  }
+  .philosophy-quote blockquote {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem; font-style: italic;
+    color: var(--cream); line-height: 1.5;
+  }
+  .philosophy-quote cite {
+    display: block; margin-top: 0.6rem;
+    font-size: 0.75rem; letter-spacing: 0.12em;
+    color: var(--sand); text-transform: uppercase;
+  }
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .stat-card {
+    padding: 1.8rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(201,151,58,0.2);
+  }
+  .stat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3rem; font-weight: 300; color: var(--gold);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: rgba(240,232,219,0.6); margin-top: 0.4rem;
+  }
+
+  /* ── DASHBOARD ── */
+  .dashboard-section { background: var(--fog); }
+  .dashboard-wrap {
+    margin-top: 3.5rem;
+    background: var(--white);
+    border: 1px solid rgba(196,168,130,0.3);
+    overflow: hidden;
+  }
+  .dashboard-header {
+    background: var(--bark);
+    padding: 1rem 1.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .dashboard-header-left {
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .dash-dots { display: flex; gap: 6px; }
+  .dash-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dash-dot:nth-child(1) { background: #e5534b; }
+  .dash-dot:nth-child(2) { background: #c9973a; }
+  .dash-dot:nth-child(3) { background: #3a6644; }
+  .dash-title-bar {
+    font-family: 'DM Mono', monospace; font-size: 0.7rem;
+    color: rgba(240,232,219,0.5); letter-spacing: 0.1em;
+  }
+  .dash-live {
+    display: flex; align-items: center; gap: 0.4rem;
+    font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--green);
+  }
+  .dash-live-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--green);
+    animation: blink 1.8s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .dashboard-body { padding: 1.5rem; }
+  .dash-top-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;
+  }
+  .kpi-card {
+    background: var(--fog);
+    border: 1px solid rgba(196,168,130,0.2);
+    padding: 1.1rem 1.2rem;
+  }
+  .kpi-label {
+    font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--sand); margin-bottom: 0.4rem;
+  }
+  .kpi-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.4rem; font-weight: 500; color: var(--bark);
+  }
+  .kpi-delta {
+    font-size: 0.72rem; font-weight: 500; margin-top: 0.2rem;
+  }
+  .kpi-delta.up { color: var(--green); }
+  .kpi-delta.down { color: var(--red); }
+  .kpi-delta.neutral { color: var(--sand); }
+
+  .dash-mid-row { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+  .dash-chart-card, .dash-psych-card {
+    background: var(--fog);
+    border: 1px solid rgba(196,168,130,0.2);
+    padding: 1.2rem;
+  }
+  .dash-card-title {
+    font-size: 0.68rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--pelt); margin-bottom: 1rem; font-weight: 500;
+  }
+  /* mini sparkline */
+  .sparkline-wrap { height: 80px; position: relative; overflow: hidden; }
+  .sparkline-wrap svg { width: 100%; height: 100%; }
+  .spark-path {
+    fill: none; stroke: var(--gold); stroke-width: 2;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+  .spark-fill {
+    fill: url(#sparkGrad); stroke: none;
+  }
+  .spark-labels {
+    display: flex; justify-content: space-between;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem; color: var(--sand);
+    margin-top: 0.4rem;
+  }
+  /* psych meter */
+  .psych-meters { display: flex; flex-direction: column; gap: 0.8rem; }
+  .psych-row { }
+  .psych-row-header {
+    display: flex; justify-content: space-between;
+    font-size: 0.7rem; color: var(--pelt); margin-bottom: 0.3rem;
+  }
+  .psych-row-val {
+    font-family: 'DM Mono', monospace; color: var(--bark); font-size: 0.7rem;
+  }
+  .bar-track {
+    height: 5px; background: rgba(196,168,130,0.2); border-radius: 99px;
+  }
+  .bar-fill {
+    height: 100%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+    transition: width 1s ease;
+  }
+
+  .dash-bot-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .dash-feed-card, .dash-lesson-card {
+    background: var(--fog);
+    border: 1px solid rgba(196,168,130,0.2);
+    padding: 1.2rem;
+  }
+  .feed-item {
+    display: flex; gap: 0.75rem; padding: 0.65rem 0;
+    border-bottom: 1px solid rgba(196,168,130,0.12);
+  }
+  .feed-item:last-child { border-bottom: none; }
+  .feed-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--gold); flex-shrink: 0; margin-top: 5px;
+  }
+  .feed-text { font-size: 0.78rem; color: var(--pelt); line-height: 1.5; }
+  .feed-time {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem; color: var(--sand); display: block; margin-top: 0.1rem;
+  }
+  .lesson-progress-item {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(196,168,130,0.12);
+  }
+  .lesson-progress-item:last-child { border-bottom: none; }
+  .lesson-icon {
+    width: 28px; height: 28px; border-radius: 4px;
+    background: var(--cream); border: 1px solid rgba(196,168,130,0.3);
+    display: grid; place-items: center; font-size: 0.75rem; flex-shrink: 0;
+  }
+  .lesson-info { flex: 1; }
+  .lesson-name { font-size: 0.78rem; color: var(--bark); font-weight: 500; }
+  .lesson-sub { font-size: 0.68rem; color: var(--sand); }
+  .lesson-pct {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem; color: var(--gold);
+  }
+
+  /* ── EMAIL SIGNUP ── */
+  .signup { background: var(--cream); }
+  .signup-inner {
+    max-width: 620px; margin: 0 auto; text-align: center;
+  }
+  .signup .section-body { margin: 0 auto 2.5rem; }
+  .email-form {
+    display: flex; gap: 0; max-width: 480px; margin: 0 auto;
+    border: 1px solid rgba(122,92,68,0.3);
+    background: var(--white);
+    overflow: hidden;
+  }
+  .email-form input {
+    flex: 1; border: none; outline: none; padding: 1rem 1.2rem;
+    font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+    background: transparent; color: var(--ink);
+  }
+  .email-form input::placeholder { color: var(--sand); }
+  .email-form button {
+    background: var(--mod); color: var(--cream);
+    border: none; padding: 1rem 1.6rem;
+    font-family: 'DM Sans', sans-serif; font-size: 0.78rem;
+    letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500;
+    cursor: pointer; transition: background 0.2s; white-space: nowrap;
+  }
+  .email-form button:hover { background: var(--gold); }
+  .signup-note {
+    font-size: 0.72rem; color: var(--sand); margin-top: 0.9rem;
+  }
+  #signup-success {
+    display: none; color: var(--green); font-size: 0.88rem; margin-top: 1rem;
+    font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.1rem;
+  }
+
+  /* ── ANNOUNCEMENTS ── */
+  .announcements { background: var(--white); }
+  .announce-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 3rem; }
+  .announce-card {
+    border: 1px solid rgba(196,168,130,0.25);
+    padding: 1.8rem;
+    position: relative; overflow: hidden;
+    transition: box-shadow 0.2s;
+  }
+  .announce-card:hover { box-shadow: 0 4px 24px rgba(74,55,40,0.08); }
+  .announce-card-top {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .announce-tag {
+    font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase;
+    padding: 0.2rem 0.6rem;
+    border: 1px solid currentColor;
+  }
+  .announce-tag.type-update { color: var(--gold); }
+  .announce-tag.type-session { color: var(--green); }
+  .announce-tag.type-alert { color: var(--red); }
+  .announce-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem; color: var(--sand);
+  }
+  .announce-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem; font-weight: 400; color: var(--bark);
+    margin-bottom: 0.6rem;
+  }
+  .announce-body {
+    font-size: 0.83rem; color: var(--pelt); line-height: 1.7;
+  }
+  .announce-from {
+    display: flex; align-items: center; gap: 0.5rem;
+    margin-top: 1.2rem; font-size: 0.72rem; color: var(--sand);
+  }
+  .announce-avatar {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--sand); display: grid; place-items: center;
+    font-size: 0.6rem; color: var(--white); font-weight: 700;
+  }
+  .announce-stripe {
+    position: absolute; top: 0; left: 0; width: 3px; height: 100%;
+  }
+  .announce-stripe.gold { background: var(--gold); }
+  .announce-stripe.green { background: var(--green); }
+  .announce-stripe.red { background: var(--red); }
+
+  /* ── ADMIN PANEL ── */
+  .admin-panel {
+    background: var(--bark); color: var(--cream);
+    padding: 4rem 2rem;
+    position: relative; overflow: hidden;
+  }
+  .admin-panel::before {
+    content: 'ADMIN';
+    position: absolute; top: 1.5rem; right: 2rem;
+    font-family: 'DM Mono', monospace; font-size: 0.6rem;
+    letter-spacing: 0.3em; color: rgba(255,255,255,0.08);
+  }
+  .admin-form-wrap {
+    max-width: 680px; margin: 0 auto;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(201,151,58,0.2);
+    padding: 2rem;
+  }
+  .admin-form-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem; font-weight: 300; color: var(--cream);
+    margin-bottom: 0.4rem;
+  }
+  .admin-form-sub {
+    font-size: 0.78rem; color: rgba(240,232,219,0.5);
+    margin-bottom: 1.8rem; letter-spacing: 0.05em;
+  }
+  .admin-gate {
+    display: flex; gap: 0.8rem; align-items: flex-end; margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem; border-bottom: 1px solid rgba(201,151,58,0.15);
+  }
+  .form-group { display: flex; flex-direction: column; gap: 0.4rem; flex: 1; }
+  .form-label {
+    font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--sand); font-weight: 500;
+  }
+  .form-input, .form-select, .form-textarea {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(201,151,58,0.2);
+    color: var(--cream); padding: 0.7rem 0.9rem;
+    font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+    outline: none; transition: border-color 0.2s;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    border-color: var(--gold);
+  }
+  .form-input::placeholder { color: rgba(240,232,219,0.3); }
+  .form-textarea {
+    resize: vertical; min-height: 110px; width: 100%;
+  }
+  .form-select option { background: var(--bark); }
+  .admin-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 0.8rem; }
+  .admin-fields .form-group:last-child { grid-column: 1 / -1; }
+  .btn-post {
+    background: var(--gold); color: var(--bark);
+    border: none; padding: 0.85rem 2rem;
+    font-family: 'DM Sans', sans-serif; font-size: 0.78rem;
+    letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700;
+    cursor: pointer; transition: all 0.2s; margin-top: 0.8rem;
+  }
+  .btn-post:hover { background: var(--cream); transform: translateY(-1px); }
+  .admin-locked { text-align: center; padding: 1rem 0; }
+  .admin-locked p {
+    font-size: 0.8rem; color: rgba(240,232,219,0.4);
+    font-family: 'DM Mono', monospace;
+  }
+  #post-success {
+    display: none; color: var(--gold); font-size: 0.85rem; margin-top: 0.8rem;
+    font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1rem;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--ink); color: rgba(240,232,219,0.5);
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+  .footer-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem; font-weight: 300; color: var(--cream);
+    letter-spacing: 0.08em; margin-bottom: 0.5rem;
+  }
+  .footer-logo span { color: var(--gold); }
+  .footer-tagline { font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 1.5rem; }
+  .footer-links { display: flex; justify-content: center; gap: 2rem; margin-bottom: 1.5rem; }
+  .footer-links a { font-size: 0.75rem; color: rgba(240,232,219,0.4); text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--gold); }
+  .footer-copy { font-size: 0.68rem; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { padding: 0 1.2rem; }
+    .nav-links { display: none; }
+    .philosophy-inner { grid-template-columns: 1fr; gap: 3rem; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .dash-top-row { grid-template-columns: 1fr 1fr; }
+    .dash-mid-row, .dash-bot-row { grid-template-columns: 1fr; }
+    .announce-grid { grid-template-columns: 1fr; }
+    .admin-fields { grid-template-columns: 1fr; }
+    .admin-fields .form-group:last-child { grid-column: 1; }
+  }
+
+  /* ── JOURNAL ── */
+  .journal-section { background: var(--white); }
+  .journal-inner {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center;
+    margin-top: 1rem;
+  }
+  .journal-features {
+    list-style: none; margin-top: 2rem;
+    display: flex; flex-direction: column; gap: 1.4rem;
+  }
+  .journal-features li {
+    display: flex; gap: 1rem; align-items: flex-start;
+  }
+  .jf-icon {
+    font-size: 1.3rem; flex-shrink: 0; margin-top: 0.1rem;
+  }
+  .journal-features li strong {
+    display: block; font-size: 0.88rem; font-weight: 600;
+    color: var(--bark); margin-bottom: 0.2rem;
+  }
+  .journal-features li p {
+    font-size: 0.8rem; color: var(--pelt); line-height: 1.6; margin: 0;
+  }
+  /* Journal mock card */
+  .journal-mock {
+    background: var(--bark);
+    border: 1px solid rgba(201,151,58,0.2);
+    overflow: hidden;
+  }
+  .journal-mock-header {
+    padding: 0.9rem 1.3rem;
+    background: rgba(0,0,0,0.2);
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid rgba(201,151,58,0.15);
+  }
+  .journal-mock-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem; font-weight: 400; color: var(--cream);
+    letter-spacing: 0.04em;
+  }
+  .journal-mock-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem; color: var(--sand);
+  }
+  .journal-mock-body { padding: 1.3rem; }
+  .journal-mock-section { margin-bottom: 0.2rem; }
+  .journal-mock-label {
+    font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 0.35rem; font-weight: 500;
+  }
+  .journal-mock-prompt {
+    font-size: 0.75rem; color: rgba(240,232,219,0.5);
+    font-style: italic; margin-bottom: 0.4rem; line-height: 1.4;
+  }
+  .journal-mock-answer {
+    font-size: 0.8rem; color: var(--cream); line-height: 1.6;
+    padding: 0.6rem 0.8rem;
+    background: rgba(255,255,255,0.04);
+    border-left: 2px solid var(--gold);
+  }
+  .journal-mock-divider {
+    height: 1px; background: rgba(201,151,58,0.12);
+    margin: 1rem 0;
+  }
+  .journal-mock-meters { }
+  .jm-meter-row {
+    display: flex; align-items: center; gap: 0.7rem;
+    margin-top: 0.55rem;
+    font-size: 0.7rem; color: rgba(240,232,219,0.55);
+  }
+  .jm-meter-row span:first-child { width: 110px; flex-shrink: 0; }
+  .jm-bar-track {
+    flex: 1; height: 4px; background: rgba(255,255,255,0.08); border-radius: 99px;
+  }
+  .jm-bar-fill {
+    height: 100%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+  }
+  .jm-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem; color: var(--gold); width: 24px; text-align: right;
+  }
+  .journal-mock-footer {
+    padding: 0.7rem 1.3rem;
+    background: rgba(0,0,0,0.15);
+    border-top: 1px solid rgba(201,151,58,0.12);
+    display: flex; justify-content: space-between;
+    font-size: 0.65rem; color: rgba(240,232,219,0.35);
+    font-family: 'DM Mono', monospace;
+  }
+  @media (max-width: 768px) {
+    .journal-inner { grid-template-columns: 1fr; gap: 3rem; }
+  }
+
+  /* ── TEAM ── */
+  .team { background: var(--fog); }
+  .team-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;
+    margin-top: 4rem;
+  }
+  .team-card {
+    display: grid; grid-template-columns: 200px 1fr; gap: 2rem;
+    padding: 2.2rem;
+    background: var(--white);
+    border: 1px solid rgba(196,168,130,0.25);
+    position: relative; overflow: hidden;
+    transition: box-shadow 0.3s, transform 0.3s;
+  }
+  .team-card:hover {
+    box-shadow: 0 8px 40px rgba(74,55,40,0.1);
+    transform: translateY(-2px);
+  }
+  .team-card-accent {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--gold), var(--sand), transparent);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.5s ease;
+  }
+  .team-card:hover .team-card-accent { transform: scaleX(1); }
+  .team-photo-wrap {
+    position: relative;
+  }
+  .team-photo {
+    width: 100%; aspect-ratio: 3/4; object-fit: cover;
+    display: block;
+    background: var(--cream);
+    border: 1px solid rgba(196,168,130,0.3);
+  }
+  .team-photo-placeholder {
+    width: 100%; aspect-ratio: 3/4;
+    background: linear-gradient(145deg, var(--cream) 0%, var(--sand) 100%);
+    border: 1px solid rgba(196,168,130,0.3);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 0.6rem;
+  }
+  .team-photo-placeholder-initials {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.8rem; font-weight: 300;
+    color: var(--mod); line-height: 1;
+  }
+  .team-photo-placeholder-hint {
+    font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--pelt); opacity: 0.6;
+  }
+  .team-photo-badge {
+    position: absolute; bottom: -1px; left: 0; right: 0;
+    background: var(--mod); padding: 0.35rem 0.6rem; text-align: center;
+  }
+  .team-photo-badge span {
+    font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--gold); font-weight: 500;
+  }
+  .team-info { display: flex; flex-direction: column; justify-content: center; }
+  .team-role {
+    font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--gold); font-weight: 500; margin-bottom: 0.5rem;
+  }
+  .team-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem; font-weight: 400; color: var(--bark);
+    line-height: 1.1; margin-bottom: 0.9rem;
+  }
+  .team-divider {
+    width: 32px; height: 1px; background: var(--gold); margin-bottom: 0.9rem;
+  }
+  .team-bio {
+    font-size: 0.83rem; color: var(--pelt); line-height: 1.75;
+    margin-bottom: 1.2rem;
+  }
+  .team-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .team-tag {
+    font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 0.25rem 0.65rem;
+    border: 1px solid rgba(196,168,130,0.35);
+    color: var(--pelt);
+  }
+  @media (max-width: 900px) {
+    .team-grid { grid-template-columns: 1fr; }
+    .team-card { grid-template-columns: 160px 1fr; gap: 1.5rem; }
+  }
+  @media (max-width: 520px) {
+    .team-card { grid-template-columns: 1fr; }
+  }
+
+  /* ── ENTRANCE ANIMATIONS ── */
+  .fade-up {
+    opacity: 0; transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+  .fade-up:nth-child(2) { transition-delay: 0.1s; }
+  .fade-up:nth-child(3) { transition-delay: 0.2s; }
+  .fade-up:nth-child(4) { transition-delay: 0.3s; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    🧠 Mental<span>Mods</span> Academy
+  </div>
+  <div class="nav-links">
+    <a href="#philosophy">Philosophy</a>
+    <a href="#journal">Journal</a>
+    <a href="#team">Team</a>
+    <a href="#announcements">Updates</a>
+    <a href="#signup">Join</a>
+  </div>
+  <button class="nav-cta" onclick="document.getElementById('signup').scrollIntoView({behavior:'smooth'})">Early Access</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-texture"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Trading Meets Therapy</div>
+    <h1 class="hero-title">
+      Not the right way.<br>The <em>consistent</em> way.
+    </h1>
+    <p class="hero-sub">
+      Mental Mods Academy teaches you to trade with discipline rooted in psychology. We don't chase perfection — we build the mental infrastructure for repeatable performance.
+    </p>
+    <div class="hero-actions">
+      <a href="#signup" class="btn-primary">Join the Waitlist</a>
+      <a href="#philosophy" class="btn-outline">Our Approach</a>
+    </div>
+  </div>
+  <div class="hero-scroll-hint">Explore</div>
+</section>
+
+<!-- PILLARS -->
+<section class="pillars" id="pillars">
+  <div class="container">
+    <div class="section-label">The Foundation</div>
+    <h2 class="section-title">Three pillars of the <em>consistent mindset</em></h2>
+    <div class="pillars-grid">
+      <div class="pillar fade-up">
+        <div class="pillar-accent"></div>
+        <div class="pillar-num">01</div>
+        <span class="pillar-icon">🧠</span>
+        <h3>Psychology First</h3>
+        <p>Your biggest edge isn't a setup — it's your mind. Our CEO is a licensed therapist. We integrate proven psychological frameworks directly into your trading practice.</p>
+      </div>
+      <div class="pillar fade-up">
+        <div class="pillar-accent"></div>
+        <div class="pillar-num">02</div>
+        <span class="pillar-icon">🔁</span>
+        <h3>Consistency Over Perfection</h3>
+        <p>We reject the myth of the "right" trade. Instead, we build systems, rituals, and mental frameworks that produce predictable, repeatable behavior in the market.</p>
+      </div>
+      <div class="pillar fade-up">
+        <div class="pillar-accent"></div>
+        <div class="pillar-num">03</div>
+        <span class="pillar-icon">📐</span>
+        <h3>Structure & Accountability</h3>
+        <p>Rules without psychology break under pressure. Psychology without structure has no anchor. We build both — together — so your process holds when it counts.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PHILOSOPHY -->
+<section class="philosophy" id="philosophy">
+  <div class="container">
+    <div class="philosophy-inner">
+      <div>
+        <div class="section-label">Our Philosophy</div>
+        <h2 class="section-title">The market <em>reflects</em> you</h2>
+        <p class="section-body">
+          Most traders lose not because of bad strategies — but because of unresolved psychological patterns. Fear, revenge trading, over-leverage, ego. We treat the trader as much as we teach the trade.
+        </p>
+        <div class="philosophy-quote">
+          <blockquote>"The most dangerous thing you bring to the market is yourself."</blockquote>
+          <cite>— Mental Mods Academy</cite>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card fade-up">
+          <div class="stat-num">80%</div>
+          <div class="stat-label">Of losses tied to psychology, not strategy</div>
+        </div>
+        <div class="stat-card fade-up">
+          <div class="stat-num">1%</div>
+          <div class="stat-label">Daily edge compounds into mastery</div>
+        </div>
+        <div class="stat-card fade-up">
+          <div class="stat-num">∞</div>
+          <div class="stat-label">Growth when the mind is in alignment</div>
+        </div>
+        <div class="stat-card fade-up">
+          <div class="stat-num">2</div>
+          <div class="stat-label">Founders. One trader. One therapist.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- JOURNAL -->
+<section class="journal-section" id="journal">
+  <div class="container">
+    <div class="journal-inner">
+      <div class="journal-text">
+        <div class="section-label">The Trading Journal</div>
+        <h2 class="section-title">Where reflection becomes <em>your edge</em></h2>
+        <p class="section-body">
+          Every elite trader keeps a journal. Not just for trades — for thoughts, emotions, and patterns. Mental Mods members get access to a structured trading journal designed by a licensed therapist to surface the mental data your charts can't show you.
+        </p>
+        <ul class="journal-features">
+          <li>
+            <span class="jf-icon">📝</span>
+            <div>
+              <strong>Pre &amp; Post-Session Entries</strong>
+              <p>Log your mindset before the open and debrief after the close. Spot emotional patterns before they cost you.</p>
+            </div>
+          </li>
+          <li>
+            <span class="jf-icon">🧠</span>
+            <div>
+              <strong>Psych Check-In Prompts</strong>
+              <p>Clinically-informed prompts designed by Brandon to help you identify fear, ego, and bias in real time.</p>
+            </div>
+          </li>
+          <li>
+            <span class="jf-icon">🔁</span>
+            <div>
+              <strong>Pattern Recognition Over Time</strong>
+              <p>Your journal builds a record of your mental tendencies — so you stop making the same mistake twice.</p>
+            </div>
+          </li>
+          <li>
+            <span class="jf-icon">📓</span>
+            <div>
+              <strong>Consistency Tracking</strong>
+              <p>Discipline isn't motivation. It's repetition. Your journal holds you accountable to your own process.</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="journal-preview">
+        <div class="journal-mock">
+          <div class="journal-mock-header">
+            <span class="journal-mock-title">Daily Journal Entry</span>
+            <span class="journal-mock-date">Jun 7, 2026</span>
+          </div>
+          <div class="journal-mock-body">
+            <div class="journal-mock-section">
+              <div class="journal-mock-label">Pre-Session · Mindset Check</div>
+              <div class="journal-mock-prompt">How are you feeling going into the session today?</div>
+              <div class="journal-mock-answer">Focused but a little anxious after yesterday's loss. Going to stick to 1 setup only and size down until I feel reset.</div>
+            </div>
+            <div class="journal-mock-divider"></div>
+            <div class="journal-mock-section">
+              <div class="journal-mock-label">Post-Session · Debrief</div>
+              <div class="journal-mock-prompt">Did you follow your rules? What pulled you off-plan?</div>
+              <div class="journal-mock-answer">Took the one setup. Held through pullback without panicking. No revenge trades. Rule adherence: 10/10.</div>
+            </div>
+            <div class="journal-mock-divider"></div>
+            <div class="journal-mock-meters">
+              <div class="journal-mock-label">Session Psych Scores</div>
+              <div class="jm-meter-row">
+                <span>Discipline</span>
+                <div class="jm-bar-track"><div class="jm-bar-fill" style="width:92%"></div></div>
+                <span class="jm-val">92</span>
+              </div>
+              <div class="jm-meter-row">
+                <span>Patience</span>
+                <div class="jm-bar-track"><div class="jm-bar-fill" style="width:78%"></div></div>
+                <span class="jm-val">78</span>
+              </div>
+              <div class="jm-meter-row">
+                <span>Emotional Control</span>
+                <div class="jm-bar-track"><div class="jm-bar-fill" style="width:85%"></div></div>
+                <span class="jm-val">85</span>
+              </div>
+            </div>
+          </div>
+          <div class="journal-mock-footer">
+            <span>📓 Mental Mods Journal</span>
+            <span>Entry #14 of 30-day streak</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section class="team" id="team">
+  <div class="container">
+    <div class="section-label">The Founders</div>
+    <h2 class="section-title">Built by a trader <em>&</em> a therapist</h2>
+    <p class="section-body">Two perspectives. One mission. We created Mental Mods because we lived the gap between knowing what to do and actually doing it — and we know exactly why that gap exists.</p>
+
+    <div class="team-grid">
+
+      <!-- Brandon -->
+      <div class="team-card fade-up">
+        <div class="team-card-accent"></div>
+        <div class="team-photo-wrap">
+          <div class="team-photo-placeholder">
+            <div class="team-photo-placeholder-initials">BF</div>
+            <div class="team-photo-placeholder-hint">Photo coming soon</div>
+          </div>
+          <div class="team-photo-badge"><span>Founder & CEO</span></div>
+        </div>
+        <div class="team-info">
+          <div class="team-role">Founder &amp; CEO</div>
+          <div class="team-name">Brandon<br>Fonseca, <em>LCSW</em></div>
+          <div class="team-divider"></div>
+          <p class="team-bio">
+            Brandon built Mental Mods from the ground up — driven by a belief that most traders fail not from lack of strategy, but from lack of self-awareness. He brings the vision, the trading foundation, and the relentless commitment to building a community that actually performs.
+          </p>
+          <div class="team-tags">
+            <span class="team-tag">LCSW</span>
+            <span class="team-tag">Licensed Therapist</span>
+            <span class="team-tag">Entrepreneur</span>
+            <span class="team-tag">Community Builder</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gabriel -->
+      <div class="team-card fade-up">
+        <div class="team-card-accent"></div>
+        <div class="team-photo-wrap">
+          <div class="team-photo-placeholder">
+            <div class="team-photo-placeholder-initials">GG</div>
+            <div class="team-photo-placeholder-hint">Photo coming soon</div>
+          </div>
+          <div class="team-photo-badge"><span>Co-Founder</span></div>
+        </div>
+        <div class="team-info">
+          <div class="team-role">Co-Founder</div>
+          <div class="team-name">Gabriel<br>Giron</div>
+          <div class="team-divider"></div>
+          <p class="team-bio">
+            Gabriel co-founded Mental Mods with a background in client services and a licensed career in body piercing — an industry built entirely on precision, trust, and consistency. He brings those same principles to trading education, understanding firsthand that mastering any craft starts with the right mental foundation and repeatable process.
+          </p>
+          <div class="team-tags">
+            <span class="team-tag">Licensed Piercer</span>
+            <span class="team-tag">Client Services</span>
+            <span class="team-tag">Entrepreneur</span>
+            <span class="team-tag">Process-Driven</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- EMAIL SIGNUP -->
+<section class="signup" id="signup">
+  <div class="container">
+    <div class="signup-inner">
+      <div class="section-label">Join the Community</div>
+      <h2 class="section-title">Get early access to <em>Mental Mods</em></h2>
+      <p class="section-body">
+        We're building something different. Join the waitlist and be first to know when we open doors — plus get exclusive pre-launch content on trading psychology.
+      </p>
+      <div class="email-form" id="signup-form-wrap">
+        <input type="email" id="email-input" placeholder="your@email.com" />
+        <button onclick="handleSignup()">Join Waitlist</button>
+      </div>
+      <p class="signup-note">No spam. No noise. Only signal.</p>
+      <p id="signup-success">✓ You're in. Welcome to the community.</p>
+      <p id="signup-error" style="display:none; color:#8b3a2a; font-size:0.82rem; margin-top:0.8rem;">Something went wrong — please try again.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ANNOUNCEMENTS -->
+<section class="announcements" id="announcements">
+  <div class="container">
+    <div class="section-label">From the Desk</div>
+    <h2 class="section-title">Academy <em>announcements</em></h2>
+    <div class="announce-grid" id="announce-grid">
+      <!-- Static seed posts -->
+      <div class="announce-card fade-up">
+        <div class="announce-stripe gold"></div>
+        <div class="announce-card-top">
+          <span class="announce-tag type-update">Platform Update</span>
+          <span class="announce-date">Jun 3, 2026</span>
+        </div>
+        <div class="announce-title">Welcome to Mental Mods Academy</div>
+        <div class="announce-body">We're officially live. Thank you for being early — this community is being built by two people who genuinely believe that trading and mental health go hand in hand. More coming soon.</div>
+        <div class="announce-from">
+          <div class="announce-avatar">MW</div>
+          <span>Mental Mods Team</span>
+        </div>
+      </div>
+      <div class="announce-card fade-up">
+        <div class="announce-stripe green"></div>
+        <div class="announce-card-top">
+          <span class="announce-tag type-session">Live Session</span>
+          <span class="announce-date">Jun 5, 2026</span>
+        </div>
+        <div class="announce-title">First Live Q&A — Thursday at 7pm EST</div>
+        <div class="announce-body">Join our CEO for the inaugural live session: "How your childhood shapes your trading behavior." Open to all waitlist members. Link will be emailed out.</div>
+        <div class="announce-from">
+          <div class="announce-avatar">DR</div>
+          <span>Dr. Rivera · CEO & Lead Therapist</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ADMIN PANEL -->
+<section class="admin-panel" id="admin">
+  <div class="container">
+    <div class="admin-form-wrap">
+      <div class="admin-form-title">Post an Announcement</div>
+      <div class="admin-form-sub">Admin access only — authenticate to publish to the board.</div>
+
+      <!-- Gate -->
+      <div class="admin-gate" id="admin-gate">
+        <div class="form-group">
+          <label class="form-label">Admin Password</label>
+          <input type="password" class="form-input" id="admin-pass" placeholder="Enter password" />
+        </div>
+        <button class="btn-post" onclick="unlockAdmin()" style="margin-top:0; height:42px; align-self:flex-end;">Unlock</button>
+      </div>
+      <div class="admin-locked" id="admin-locked-msg">
+        <p>🔒 Enter the admin password to post.</p>
+      </div>
+
+      <!-- Post form (hidden until unlocked) -->
+      <div id="admin-form" style="display:none;">
+        <div class="admin-fields">
+          <div class="form-group">
+            <label class="form-label">Title</label>
+            <input type="text" class="form-input" id="post-title" placeholder="Announcement title" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Type</label>
+            <select class="form-select" id="post-type">
+              <option value="update">Platform Update</option>
+              <option value="session">Live Session</option>
+              <option value="alert">Important Alert</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">From (Author name)</label>
+            <input type="text" class="form-input" id="post-author" placeholder="e.g. Mental Mods Team" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Author Initials</label>
+            <input type="text" class="form-input" id="post-initials" placeholder="e.g. MW" maxlength="3"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Message</label>
+            <textarea class="form-textarea" id="post-body" placeholder="Write your announcement..."></textarea>
+          </div>
+        </div>
+        <button class="btn-post" onclick="postAnnouncement()">Publish Announcement →</button>
+        <p id="post-success">✓ Announcement posted successfully.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Mental<span>Mods</span> Academy</div>
+  <div class="footer-tagline">Not the right way. The consistent way.</div>
+  <div class="footer-links">
+    <a href="#pillars">About</a>
+    <a href="#philosophy">Philosophy</a>
+    <a href="#dashboard">Dashboard</a>
+    <a href="#announcements">Updates</a>
+    <a href="#signup">Join</a>
+  </div>
+  <div class="footer-copy">© 2026 Mental Mods Academy. All rights reserved.</div>
+</footer>
+
+<script>
+  // ── Scroll fade-in ──
+  const fadeEls = document.querySelectorAll('.fade-up');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.12 });
+  fadeEls.forEach(el => observer.observe(el));
+
+  // ── Email Signup (Formspree) ──
+  async function handleSignup() {
+    const input   = document.getElementById('email-input');
+    const success = document.getElementById('signup-success');
+    const error   = document.getElementById('signup-error');
+    const wrap    = document.getElementById('signup-form-wrap');
+    const val     = input.value.trim();
+
+    if (!val || !val.includes('@')) {
+      input.style.borderColor = '#8b3a2a';
+      setTimeout(() => input.style.borderColor = '', 800);
+      return;
+    }
+
+    // Disable button while submitting
+    const btn = wrap.querySelector('button');
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch('https://formspree.io/f/YOUR_FORM_ID', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ email: val, source: 'Mental Mods Waitlist' })
+      });
+
+      if (res.ok) {
+        wrap.style.display = 'none';
+        document.querySelector('.signup-note').style.display = 'none';
+        success.style.display = 'block';
+      } else {
+        throw new Error('Non-OK response');
+      }
+    } catch (err) {
+      btn.textContent = 'Join Waitlist';
+      btn.disabled = false;
+      error.style.display = 'block';
+    }
+  }
+  document.getElementById('email-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleSignup();
+  });
+
+  // ── Admin Panel ──
+  const ADMIN_PASSWORD = 'mods2026'; // Change this to your real password
+
+  function unlockAdmin() {
+    const pass = document.getElementById('admin-pass').value;
+    if (pass === ADMIN_PASSWORD) {
+      document.getElementById('admin-gate').style.display = 'none';
+      document.getElementById('admin-locked-msg').style.display = 'none';
+      document.getElementById('admin-form').style.display = 'block';
+    } else {
+      const input = document.getElementById('admin-pass');
+      input.style.borderColor = '#8b3a2a';
+      input.value = '';
+      input.placeholder = 'Incorrect password';
+      setTimeout(() => {
+        input.style.borderColor = '';
+        input.placeholder = 'Enter password';
+      }, 1500);
+    }
+  }
+
+  function postAnnouncement() {
+    const title    = document.getElementById('post-title').value.trim();
+    const type     = document.getElementById('post-type').value;
+    const author   = document.getElementById('post-author').value.trim() || 'Mental Mods Team';
+    const initials = document.getElementById('post-initials').value.trim().toUpperCase() || 'MW';
+    const body     = document.getElementById('post-body').value.trim();
+
+    if (!title || !body) {
+      alert('Please fill in title and message.');
+      return;
+    }
+
+    const typeMap = {
+      update:  { label: 'Platform Update', stripe: 'gold',  cls: 'type-update'  },
+      session: { label: 'Live Session',    stripe: 'green', cls: 'type-session'  },
+      alert:   { label: 'Important Alert', stripe: 'red',   cls: 'type-alert'    },
+    };
+    const t = typeMap[type];
+    const now = new Date().toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+
+    const card = document.createElement('div');
+    card.className = 'announce-card';
+    card.innerHTML = `
+      <div class="announce-stripe ${t.stripe}"></div>
+      <div class="announce-card-top">
+        <span class="announce-tag ${t.cls}">${t.label}</span>
+        <span class="announce-date">${now}</span>
+      </div>
+      <div class="announce-title">${escapeHtml(title)}</div>
+      <div class="announce-body">${escapeHtml(body)}</div>
+      <div class="announce-from">
+        <div class="announce-avatar">${escapeHtml(initials)}</div>
+        <span>${escapeHtml(author)}</span>
+      </div>
+    `;
+
+    const grid = document.getElementById('announce-grid');
+    grid.insertBefore(card, grid.firstChild);
+    document.getElementById('announcements').scrollIntoView({ behavior: 'smooth' });
+
+    // Reset form
+    document.getElementById('post-title').value = '';
+    document.getElementById('post-body').value = '';
+    document.getElementById('post-author').value = '';
+    document.getElementById('post-initials').value = '';
+
+    const s = document.getElementById('post-success');
+    s.style.display = 'block';
+    setTimeout(() => s.style.display = 'none', 3000);
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  document.getElementById('admin-pass').addEventListener('keydown', e => {
+    if (e.key === 'Enter') unlockAdmin();
+  });
+</script>
+</body>
+</html>

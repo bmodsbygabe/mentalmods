@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mental Mods Academy — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --ink:      #1a1612;
+    --bark:     #2e2520;
+    --mod:      #4a3728;
+    --pelt:     #7a5c44;
+    --sand:     #c4a882;
+    --cream:    #f0e8db;
+    --fog:      #f8f3ed;
+    --gold:     #c9973a;
+    --gold-dim: #a87830;
+    --red:      #8b3a2a;
+    --green:    #3a6644;
+    --white:    #fdfaf6;
+    --sidebar:  220px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--fog); color: var(--ink); overflow-x: hidden; }
+
+  /* ── AUTH SCREEN ── */
+  #auth-screen {
+    min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr;
+  }
+  .auth-left {
+    background: var(--bark);
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 4rem; position: relative; overflow: hidden;
+  }
+  .auth-left::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 30% 50%, rgba(201,151,58,0.1) 0%, transparent 70%);
+  }
+  .auth-brand {
+    position: relative; z-index: 1;
+  }
+  .auth-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem; font-weight: 300; color: var(--cream);
+    letter-spacing: 0.06em; margin-bottom: 0.4rem;
+  }
+  .auth-logo span { color: var(--gold); }
+  .auth-tagline {
+    font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--sand); margin-bottom: 3rem;
+  }
+  .auth-quote {
+    border-left: 2px solid var(--gold); padding-left: 1.2rem;
+  }
+  .auth-quote blockquote {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem; font-style: italic; color: var(--cream);
+    line-height: 1.5;
+  }
+  .auth-quote cite {
+    font-size: 0.68rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--sand); display: block; margin-top: 0.6rem;
+  }
+  .auth-right {
+    background: var(--fog);
+    display: flex; align-items: center; justify-content: center; padding: 3rem;
+  }
+  .auth-box { width: 100%; max-width: 400px; }
+  .auth-tabs {
+    display: flex; gap: 0; margin-bottom: 2rem;
+    border-bottom: 1px solid rgba(196,168,130,0.3);
+  }
+  .auth-tab {
+    padding: 0.7rem 1.4rem; background: none; border: none;
+    font-family: 'DM Sans', sans-serif; font-size: 0.8rem;
+    letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500;
+    color: var(--sand); cursor: pointer; transition: all 0.2s;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  .auth-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+  .auth-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.9rem; font-weight: 300; color: var(--bark);
+    margin-bottom: 0.3rem;
+  }
+  .auth-sub { font-size: 0.82rem; color: var(--pelt); margin-bottom: 1.8rem; }
+  .auth-field { margin-bottom: 1rem; }
+  .auth-label {
+    display: block; font-size: 0.65rem; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--pelt); margin-bottom: 0.4rem; font-weight: 500;
+  }
+  .auth-input {
+    width: 100%; padding: 0.75rem 1rem;
+    background: var(--white); border: 1px solid rgba(196,168,130,0.35);
+    font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--ink);
+    outline: none; transition: border-color 0.2s;
+  }
+  .auth-input:focus { border-color: var(--gold); }
+  .auth-input::placeholder { color: var(--sand); }
+  .auth-btn {
+    width: 100%; padding: 0.9rem;
+    background: var(--mod); color: var(--cream); border: none;
+    font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+    letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500;
+    cursor: pointer; transition: background 0.2s; margin-top: 0.5rem;
+  }
+  .auth-btn:hover { background: var(--gold); }
+  .auth-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .auth-msg {
+    font-size: 0.8rem; margin-top: 0.9rem; text-align: center;
+    padding: 0.6rem; display: none;
+  }
+  .auth-msg.success { color: var(--green); background: rgba(58,102,68,0.08); }
+  .auth-msg.error   { color: var(--red);   background: rgba(139,58,42,0.08); }
+  @media (max-width: 768px) {
+    #auth-screen { grid-template-columns: 1fr; }
+    .auth-left { display: none; }
+  }
+
+  /* ── APP LAYOUT ── */
+  #app { display: none; min-height: 100vh; }
+  .app-layout { display: flex; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: var(--sidebar); min-height: 100vh;
+    background: var(--bark); display: flex; flex-direction: column;
+    position: fixed; left: 0; top: 0; bottom: 0; z-index: 50;
+  }
+  .sidebar-logo {
+    padding: 1.4rem 1.3rem;
+    border-bottom: 1px solid rgba(201,151,58,0.12);
+  }
+  .sidebar-logo-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem; font-weight: 300; color: var(--cream);
+    letter-spacing: 0.06em;
+  }
+  .sidebar-logo-text span { color: var(--gold); }
+  .sidebar-logo-sub {
+    font-size: 0.58rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--sand); opacity: 0.6; margin-top: 0.1rem;
+  }
+  .sidebar-user {
+    padding: 1rem 1.3rem;
+    border-bottom: 1px solid rgba(201,151,58,0.1);
+    display: flex; align-items: center; gap: 0.7rem;
+  }
+  .sidebar-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+    display: grid; place-items: center;
+    font-size: 0.75rem; font-weight: 700; color: var(--bark); flex-shrink: 0;
+  }
+  .sidebar-user-info { overflow: hidden; }
+  .sidebar-user-name {
+    font-size: 0.78rem; font-weight: 500; color: var(--cream);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .sidebar-user-role {
+    font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--sand); opacity: 0.7;
+  }
+  .sidebar-nav { flex: 1; padding: 1rem 0; }
+  .sidebar-section-label {
+    font-size: 0.55rem; letter-spacing: 0.22em; text-transform: uppercase;
+    color: rgba(196,168,130,0.4); padding: 0.6rem 1.3rem 0.3rem; font-weight: 500;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 0.7rem;
+    padding: 0.65rem 1.3rem; cursor: pointer;
+    font-size: 0.8rem; color: rgba(240,232,219,0.55);
+    transition: all 0.2s; border-left: 2px solid transparent;
+    user-select: none;
+  }
+  .nav-item:hover { color: var(--cream); background: rgba(255,255,255,0.04); }
+  .nav-item.active {
+    color: var(--gold); border-left-color: var(--gold);
+    background: rgba(201,151,58,0.08);
+  }
+  .nav-item .nav-icon { font-size: 1rem; width: 20px; text-align: center; flex-shrink: 0; }
+  .nav-item .nav-badge {
+    margin-left: auto; background: var(--gold); color: var(--bark);
+    font-size: 0.58rem; font-weight: 700; padding: 0.1rem 0.4rem; border-radius: 99px;
+  }
+  .sidebar-footer {
+    padding: 1rem 1.3rem;
+    border-top: 1px solid rgba(201,151,58,0.1);
+  }
+  .signout-btn {
+    display: flex; align-items: center; gap: 0.6rem;
+    font-size: 0.75rem; color: rgba(240,232,219,0.35);
+    cursor: pointer; transition: color 0.2s; background: none; border: none;
+    font-family: 'DM Sans', sans-serif; padding: 0;
+  }
+  .signout-btn:hover { color: var(--red); }
+
+  /* ── MAIN CONTENT ── */
+  .main-content {
+    margin-left: var(--sidebar); flex: 1;
+    padding: 2rem 2.5rem; min-height: 100vh;
+  }
+  .page { display: none; }
+  .page.active { display: block; }
+  .page-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 2rem; padding-bottom: 1.2rem;
+    border-bottom: 1px solid rgba(196,168,130,0.2);
+  }
+  .page-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem; font-weight: 300; color: var(--bark);
+  }
+  .page-title em { font-style: italic; color: var(--gold); }
+  .page-sub { font-size: 0.8rem; color: var(--pelt); margin-top: 0.2rem; }
+  .page-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem; color: var(--sand);
+  }
+
+  /* ── OVERVIEW PAGE ── */
+  .kpi-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;
+  }
+  .kpi {
+    background: var(--white); border: 1px solid rgba(196,168,130,0.2);
+    padding: 1.2rem; transition: box-shadow 0.2s;
+  }
+  .kpi:hover { box-shadow: 0 4px 20px rgba(74,55,40,0.07); }
+  .kpi-label { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--sand); margin-bottom: 0.4rem; }
+  .kpi-val { font-family: 'DM Mono', monospace; font-size: 1.6rem; font-weight: 500; color: var(--bark); line-height: 1; }
+  .kpi-sub { font-size: 0.7rem; color: var(--pelt); margin-top: 0.3rem; }
+  .kpi-sub.up { color: var(--green); }
+  .kpi-sub.down { color: var(--red); }
+
+  .overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .card {
+    background: var(--white); border: 1px solid rgba(196,168,130,0.2);
+    padding: 1.4rem;
+  }
+  .card-title {
+    font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--pelt); font-weight: 500; margin-bottom: 1.1rem;
+  }
+
+  /* ── PSYCH METERS ── */
+  .psych-meter-row {
+    display: flex; align-items: center; gap: 0.8rem;
+    padding: 0.5rem 0; border-bottom: 1px solid rgba(196,168,130,0.1);
+  }
+  .psych-meter-row:last-child { border-bottom: none; }
+  .psych-meter-name { font-size: 0.78rem; color: var(--pelt); width: 130px; flex-shrink: 0; }
+  .psych-track { flex: 1; height: 5px; background: rgba(196,168,130,0.15); border-radius: 99px; }
+  .psych-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--gold-dim), var(--gold)); transition: width 1s ease; }
+  .psych-val { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--gold); width: 32px; text-align: right; }
+
+  /* ── ANNOUNCEMENTS FEED ── */
+  .announce-feed-item {
+    display: flex; gap: 0.9rem; padding: 0.8rem 0;
+    border-bottom: 1px solid rgba(196,168,130,0.1);
+  }
+  .announce-feed-item:last-child { border-bottom: none; }
+  .afi-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); flex-shrink: 0; margin-top: 5px; }
+  .afi-title { font-size: 0.82rem; font-weight: 500; color: var(--bark); }
+  .afi-meta { font-size: 0.7rem; color: var(--sand); margin-top: 0.1rem; }
+
+  /* ── JOURNAL PAGE ── */
+  .journal-controls {
+    display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap;
+  }
+  .journal-controls .btn-primary {
+    background: var(--mod); color: var(--cream); border: none;
+    padding: 0.65rem 1.4rem; font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .journal-controls .btn-primary:hover { background: var(--gold); }
+  .journal-list { display: flex; flex-direction: column; gap: 0.8rem; }
+  .journal-entry {
+    background: var(--white); border: 1px solid rgba(196,168,130,0.2);
+    padding: 1.3rem; cursor: pointer; transition: all 0.2s;
+    border-left: 3px solid transparent;
+  }
+  .journal-entry:hover { border-left-color: var(--gold); box-shadow: 0 2px 16px rgba(74,55,40,0.06); }
+  .je-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
+  .je-date { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--sand); }
+  .je-mood {
+    font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 0.15rem 0.5rem; border-radius: 99px;
+  }
+  .je-mood.focused { background: rgba(58,102,68,0.12); color: var(--green); }
+  .je-mood.anxious { background: rgba(201,151,58,0.12); color: var(--gold); }
+  .je-mood.neutral { background: rgba(196,168,130,0.15); color: var(--pelt); }
+  .je-mood.confident { background: rgba(58,102,68,0.15); color: var(--green); }
+  .je-title { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; font-weight: 400; color: var(--bark); margin-bottom: 0.3rem; }
+  .je-preview { font-size: 0.78rem; color: var(--pelt); line-height: 1.5; }
+  .je-scores { display: flex; gap: 1rem; margin-top: 0.7rem; flex-wrap: wrap; }
+  .je-score {
+    font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--sand);
+    display: flex; align-items: center; gap: 0.3rem;
+  }
+  .je-score span { color: var(--gold); }
+
+  /* Journal modal */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(26,22,18,0.7);
+    z-index: 200; display: none; align-items: center; justify-content: center;
+    padding: 2rem;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--white); width: 100%; max-width: 680px;
+    max-height: 90vh; overflow-y: auto;
+    border: 1px solid rgba(196,168,130,0.3);
+  }
+  .modal-header {
+    padding: 1.3rem 1.5rem; background: var(--bark);
+    display: flex; justify-content: space-between; align-items: center;
+    position: sticky; top: 0; z-index: 1;
+  }
+  .modal-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem; font-weight: 300; color: var(--cream);
+  }
+  .modal-close {
+    background: none; border: none; color: var(--sand);
+    font-size: 1.2rem; cursor: pointer; transition: color 0.2s;
+  }
+  .modal-close:hover { color: var(--cream); }
+  .modal-body { padding: 1.5rem; }
+  .modal-section { margin-bottom: 1.3rem; }
+  .modal-label {
+    font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--gold); font-weight: 500; margin-bottom: 0.5rem;
+  }
+  .modal-input, .modal-textarea, .modal-select {
+    width: 100%; padding: 0.7rem 0.9rem;
+    background: var(--fog); border: 1px solid rgba(196,168,130,0.3);
+    font-family: 'DM Sans', sans-serif; font-size: 0.85rem; color: var(--ink);
+    outline: none; transition: border-color 0.2s;
+  }
+  .modal-input:focus, .modal-textarea:focus, .modal-select:focus { border-color: var(--gold); }
+  .modal-textarea { resize: vertical; min-height: 90px; }
+  .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .modal-score-row {
+    display: flex; align-items: center; gap: 1rem; margin-bottom: 0.7rem;
+  }
+  .modal-score-label { font-size: 0.78rem; color: var(--pelt); width: 140px; flex-shrink: 0; }
+  .modal-score-input {
+    flex: 1; -webkit-appearance: none; appearance: none;
+    height: 4px; background: rgba(196,168,130,0.2); outline: none; border-radius: 99px;
+  }
+  .modal-score-input::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+    background: var(--gold); cursor: pointer;
+  }
+  .modal-score-val {
+    font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--gold); width: 28px; text-align: right;
+  }
+  .modal-footer {
+    padding: 1rem 1.5rem; border-top: 1px solid rgba(196,168,130,0.15);
+    display: flex; justify-content: flex-end; gap: 0.8rem;
+  }
+  .btn-cancel {
+    padding: 0.6rem 1.2rem; background: none;
+    border: 1px solid rgba(196,168,130,0.3);
+    font-family: 'DM Sans', sans-serif; font-size: 0.78rem;
+    color: var(--pelt); cursor: pointer; transition: all 0.2s;
+  }
+  .btn-cancel:hover { border-color: var(--pelt); }
+  .btn-save {
+    padding: 0.6rem 1.4rem; background: var(--mod); color: var(--cream);
+    border: none; font-family: 'DM Sans', sans-serif; font-size: 0.78rem;
+    letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: background 0.2s;
+  }
+  .btn-save:hover { background: var(--gold); }
+
+  /* ── COURSE PAGE ── */
+  .course-modules { display: flex; flex-direction: column; gap: 1rem; }
+  .module-card {
+    background: var(--white); border: 1px solid rgba(196,168,130,0.2);
+    overflow: hidden;
+  }
+  .module-header {
+    display: flex; align-items: center; gap: 1.2rem; padding: 1.2rem 1.4rem;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .module-header:hover { background: var(--fog); }
+  .module-num {
+    font-family: 'DM Mono', monospace; font-size: 0.7rem;
+    color: var(--sand); width: 28px; flex-shrink: 0;
+  }
+  .module-icon { font-size: 1.2rem; flex-shrink: 0; }
+  .module-info { flex: 1; }
+  .module-name { font-size: 0.92rem; font-weight: 500; color: var(--bark); }
+  .module-sub { font-size: 0.73rem; color: var(--pelt); margin-top: 0.1rem; }
+  .module-progress-wrap { width: 100px; }
+  .module-progress-bar { height: 4px; background: rgba(196,168,130,0.15); border-radius: 99px; margin-bottom: 0.3rem; }
+  .module-progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--gold-dim), var(--gold)); }
+  .module-pct { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--gold); text-align: right; }
+  .module-status {
+    font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 0.2rem 0.6rem; border-radius: 99px; flex-shrink: 0;
+  }
+  .module-status.complete { background: rgba(58,102,68,0.12); color: var(--green); }
+  .module-status.active   { background: rgba(201,151,58,0.12); color: var(--gold); }
+  .module-status.locked   { background: rgba(196,168,130,0.1);  color: var(--sand); }
+
+  /* ── ADMIN PAGE ── */
+  .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .admin-card {
+    background: var(--white); border: 1px solid rgba(196,168,130,0.2); padding: 1.4rem;
+  }
+  .admin-stat { text-align: center; padding: 1rem 0; }
+  .admin-stat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3.5rem; font-weight: 300; color: var(--gold); line-height: 1;
+  }
+  .admin-stat-label { font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--pelt); margin-top: 0.4rem; }
+  .admin-announce-form { display: flex; flex-direction: column; gap: 0.8rem; }
+  .admin-input, .admin-textarea, .admin-select {
+    width: 100%; padding: 0.7rem 0.9rem;
+    background: var(--fog); border: 1px solid rgba(196,168,130,0.3);
+    font-family: 'DM Sans', sans-serif; font-size: 0.85rem; color: var(--ink);
+    outline: none; transition: border-color 0.2s;
+  }
+  .admin-input:focus, .admin-textarea:focus, .admin-select:focus { border-color: var(--gold); }
+  .admin-textarea { resize: vertical; min-height: 90px; }
+  .admin-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+  .admin-label {
+    font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--pelt); margin-bottom: 0.3rem; display: block; font-weight: 500;
+  }
+  .btn-admin-post {
+    background: var(--gold); color: var(--bark); border: none;
+    padding: 0.75rem; font-family: 'DM Sans', sans-serif; font-size: 0.78rem;
+    letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-admin-post:hover { background: var(--mod); color: var(--cream); }
+  .member-list { display: flex; flex-direction: column; gap: 0.5rem; max-height: 300px; overflow-y: auto; }
+  .member-row {
+    display: flex; align-items: center; gap: 0.8rem; padding: 0.6rem 0;
+    border-bottom: 1px solid rgba(196,168,130,0.1); font-size: 0.8rem;
+  }
+  .member-row:last-child { border-bottom: none; }
+  .member-av {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--cream); border: 1px solid rgba(196,168,130,0.3);
+    display: grid; place-items: center; font-size: 0.65rem;
+    font-weight: 700; color: var(--mod); flex-shrink: 0;
+  }
+  .member-email { color: var(--pelt); flex: 1; }
+  .member-joined { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--sand); }
+  .admin-msg {
+    font-size: 0.8rem; padding: 0.5rem; text-align: center; display: none;
+  }
+  .admin-msg.success { color: var(--green); }
+  .admin-msg.error   { color: var(--red); }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed; bottom: 2rem; right: 2rem; z-index: 999;
+    background: var(--bark); color: var(--cream);
+    padding: 0.8rem 1.3rem; font-size: 0.82rem;
+    border-left: 3px solid var(--gold);
+    transform: translateY(80px); opacity: 0;
+    transition: all 0.3s ease; pointer-events: none;
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center; padding: 3rem 1rem;
+    color: var(--sand);
+  }
+  .empty-state-icon { font-size: 2.5rem; margin-bottom: 0.8rem; }
+  .empty-state p { font-size: 0.85rem; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .kpi-row { grid-template-columns: 1fr 1fr; }
+    .overview-grid, .admin-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); transition: transform 0.3s; }
+    .sidebar.open { transform: translateX(0); }
+    .main-content { margin-left: 0; padding: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ AUTH SCREEN ══ -->
+<div id="auth-screen">
+<div id="demo-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:999;background:var(--gold);color:var(--bark);text-align:center;padding:0.5rem;font-size:0.75rem;letter-spacing:0.1em;font-weight:600;">⚠ DEMO MODE — Supabase not connected yet. Sign in with any email/password to preview.</div>
+  <div class="auth-left">
+    <div class="auth-brand">
+      <div class="auth-logo">Mental<span>Mods</span> Academy</div>
+      <div class="auth-tagline">Not the right way. The consistent way.</div>
+      <div class="auth-quote">
+        <blockquote>"The most dangerous thing you bring to the market is yourself."</blockquote>
+        <cite>— Mental Mods Academy</cite>
+      </div>
+    </div>
+  </div>
+  <div class="auth-right">
+    <div class="auth-box">
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchTab('login')">Sign In</button>
+        <button class="auth-tab" onclick="switchTab('signup')">Create Account</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="tab-login">
+        <div class="auth-title">Welcome back.</div>
+        <div class="auth-sub">Sign in to access your dashboard.</div>
+        <div class="auth-field">
+          <label class="auth-label">Email</label>
+          <input class="auth-input" type="email" id="login-email" placeholder="your@email.com" />
+        </div>
+        <div class="auth-field">
+          <label class="auth-label">Password</label>
+          <input class="auth-input" type="password" id="login-password" placeholder="••••••••" />
+        </div>
+        <button class="auth-btn" id="login-btn" onclick="handleLogin()">Sign In</button>
+        <div class="auth-msg" id="login-msg"></div>
+      </div>
+
+      <!-- SIGNUP -->
+      <div id="tab-signup" style="display:none;">
+        <div class="auth-title">Join the academy.</div>
+        <div class="auth-sub">Create your account — a verification link will be sent to your email.</div>
+        <div class="auth-field">
+          <label class="auth-label">Full Name</label>
+          <input class="auth-input" type="text" id="signup-name" placeholder="Your name" />
+        </div>
+        <div class="auth-field">
+          <label class="auth-label">Email</label>
+          <input class="auth-input" type="email" id="signup-email" placeholder="your@email.com" />
+        </div>
+        <div class="auth-field">
+          <label class="auth-label">Password</label>
+          <input class="auth-input" type="password" id="signup-password" placeholder="Min. 8 characters" />
+        </div>
+        <button class="auth-btn" id="signup-btn" onclick="handleSignup()">Create Account</button>
+        <div class="auth-msg" id="signup-msg"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+  <div class="app-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-text">Mental<span>Mods</span></div>
+        <div class="sidebar-logo-sub">Academy Dashboard</div>
+      </div>
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="user-avatar">MM</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="user-name">Member</div>
+          <div class="sidebar-user-role" id="user-role">Member</div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section-label">Main</div>
+        <div class="nav-item active" onclick="showPage('overview')">
+          <span class="nav-icon">📊</span> Overview
+        </div>
+        <div class="nav-item" onclick="showPage('journal')">
+          <span class="nav-icon">📓</span> Journal
+        </div>
+        <div class="nav-item" onclick="showPage('course')">
+          <span class="nav-icon">🎓</span> Course
+        </div>
+        <div class="nav-item" onclick="showPage('announcements-page')">
+          <span class="nav-icon">📢</span> Announcements
+          <span class="nav-badge" id="announce-badge" style="display:none">!</span>
+        </div>
+        <div id="admin-nav-section" style="display:none;">
+          <div class="sidebar-section-label" style="margin-top:0.8rem;">Admin</div>
+          <div class="nav-item" onclick="showPage('admin')">
+            <span class="nav-icon">⚙️</span> Manage
+          </div>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="signout-btn" onclick="handleSignout()">↩ Sign Out</button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content">
+
+      <!-- ── OVERVIEW ── -->
+      <div class="page active" id="page-overview">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Good morning, <em id="greeting-name">there</em>.</div>
+            <div class="page-sub">Here's where you stand today.</div>
+          </div>
+          <div class="page-date" id="today-date"></div>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi">
+            <div class="kpi-label">Journal Streak</div>
+            <div class="kpi-val" id="kpi-streak">0</div>
+            <div class="kpi-sub">days in a row</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Total Entries</div>
+            <div class="kpi-val" id="kpi-entries">0</div>
+            <div class="kpi-sub">logged</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Avg Discipline</div>
+            <div class="kpi-val" id="kpi-discipline">—</div>
+            <div class="kpi-sub">score</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Course Progress</div>
+            <div class="kpi-val" id="kpi-progress">0%</div>
+            <div class="kpi-sub">completed</div>
+          </div>
+        </div>
+        <div class="overview-grid">
+          <div class="card">
+            <div class="card-title">Psych Health — Last Entry</div>
+            <div id="overview-psych">
+              <div class="empty-state"><div class="empty-state-icon">🧠</div><p>Log a journal entry to see your psych scores.</p></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Latest Announcements</div>
+            <div id="overview-announcements">
+              <div class="empty-state"><div class="empty-state-icon">📢</div><p>No announcements yet.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── JOURNAL ── -->
+      <div class="page" id="page-journal">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Trading <em>Journal</em></div>
+            <div class="page-sub">Your mental record. Your edge.</div>
+          </div>
+          <button class="journal-controls btn-primary" onclick="openJournalModal()">+ New Entry</button>
+        </div>
+        <div class="journal-list" id="journal-list">
+          <div class="empty-state"><div class="empty-state-icon">📓</div><p>No entries yet. Start logging to build your edge.</p></div>
+        </div>
+      </div>
+
+      <!-- ── COURSE ── -->
+      <div class="page" id="page-course">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Your <em>Course</em></div>
+            <div class="page-sub">Not the right way. The consistent way.</div>
+          </div>
+        </div>
+        <div class="course-modules">
+          <div class="module-card">
+            <div class="module-header">
+              <div class="module-num">01</div>
+              <div class="module-icon">🧠</div>
+              <div class="module-info">
+                <div class="module-name">Psych Foundations</div>
+                <div class="module-sub">Understanding how your mind shapes your trades</div>
+              </div>
+              <div class="module-progress-wrap">
+                <div class="module-progress-bar"><div class="module-progress-fill" style="width:100%"></div></div>
+                <div class="module-pct">100%</div>
+              </div>
+              <div class="module-status complete">Complete</div>
+            </div>
+          </div>
+          <div class="module-card">
+            <div class="module-header">
+              <div class="module-num">02</div>
+              <div class="module-icon">📐</div>
+              <div class="module-info">
+                <div class="module-name">Building Your Process</div>
+                <div class="module-sub">Rules, rituals, and repeatable behavior</div>
+              </div>
+              <div class="module-progress-wrap">
+                <div class="module-progress-bar"><div class="module-progress-fill" style="width:60%"></div></div>
+                <div class="module-pct">60%</div>
+              </div>
+              <div class="module-status active">In Progress</div>
+            </div>
+          </div>
+          <div class="module-card">
+            <div class="module-header">
+              <div class="module-num">03</div>
+              <div class="module-icon">🔁</div>
+              <div class="module-info">
+                <div class="module-name">Consistency Rituals</div>
+                <div class="module-sub">Daily habits that compound into mastery</div>
+              </div>
+              <div class="module-progress-wrap">
+                <div class="module-progress-bar"><div class="module-progress-fill" style="width:0%"></div></div>
+                <div class="module-pct">0%</div>
+              </div>
+              <div class="module-status locked">Locked</div>
+            </div>
+          </div>
+          <div class="module-card">
+            <div class="module-header">
+              <div class="module-num">04</div>
+              <div class="module-icon">🎯</div>
+              <div class="module-info">
+                <div class="module-name">Mindset Live</div>
+                <div class="module-sub">Live sessions with Brandon Fonseca, LCSW</div>
+              </div>
+              <div class="module-progress-wrap">
+                <div class="module-progress-bar"><div class="module-progress-fill" style="width:0%"></div></div>
+                <div class="module-pct">—</div>
+              </div>
+              <div class="module-status locked">Locked</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ANNOUNCEMENTS PAGE ── -->
+      <div class="page" id="page-announcements-page">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Academy <em>Announcements</em></div>
+            <div class="page-sub">Updates from the Mental Mods team.</div>
+          </div>
+        </div>
+        <div id="announcements-list" class="journal-list">
+          <div class="empty-state"><div class="empty-state-icon">📢</div><p>No announcements yet.</p></div>
+        </div>
+      </div>
+
+      <!-- ── ADMIN ── -->
+      <div class="page" id="page-admin">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Admin <em>Panel</em></div>
+            <div class="page-sub">Manage Mental Mods Academy.</div>
+          </div>
+        </div>
+        <div class="admin-grid">
+          <div class="admin-card">
+            <div class="card-title">Post Announcement</div>
+            <div class="admin-announce-form">
+              <div>
+                <label class="admin-label">Title</label>
+                <input class="admin-input" id="a-title" placeholder="Announcement title" />
+              </div>
+              <div class="admin-form-row">
+                <div>
+                  <label class="admin-label">Type</label>
+                  <select class="admin-select" id="a-type">
+                    <option value="update">Platform Update</option>
+                    <option value="session">Live Session</option>
+                    <option value="alert">Important Alert</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="admin-label">From</label>
+                  <input class="admin-input" id="a-author" placeholder="e.g. Mental Mods Team" />
+                </div>
+              </div>
+              <div>
+                <label class="admin-label">Message</label>
+                <textarea class="admin-textarea" id="a-body" placeholder="Write your announcement..."></textarea>
+              </div>
+              <button class="btn-admin-post" onclick="postAnnouncement()">Publish →</button>
+              <div class="admin-msg" id="admin-announce-msg"></div>
+            </div>
+          </div>
+          <div class="admin-card">
+            <div class="card-title">Member Overview</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.2rem;">
+              <div class="admin-stat">
+                <div class="admin-stat-num" id="admin-member-count">—</div>
+                <div class="admin-stat-label">Total Members</div>
+              </div>
+              <div class="admin-stat">
+                <div class="admin-stat-num" id="admin-entry-count">—</div>
+                <div class="admin-stat-label">Journal Entries</div>
+              </div>
+            </div>
+            <div class="card-title">Recent Signups</div>
+            <div class="member-list" id="member-list">
+              <div class="empty-state" style="padding:1rem 0;"><p>Loading members...</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Journal Modal -->
+<div class="modal-overlay" id="journal-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">New Journal Entry</div>
+      <button class="modal-close" onclick="closeJournalModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-grid" style="margin-bottom:1rem;">
+        <div class="modal-section">
+          <div class="modal-label">Session Date</div>
+          <input class="modal-input" type="date" id="j-date" />
+        </div>
+        <div class="modal-section">
+          <div class="modal-label">Mindset Going In</div>
+          <select class="modal-select" id="j-mood">
+            <option value="focused">Focused</option>
+            <option value="confident">Confident</option>
+            <option value="anxious">Anxious</option>
+            <option value="neutral">Neutral</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-label">Pre-Session — How are you feeling?</div>
+        <textarea class="modal-textarea" id="j-pre" placeholder="What's your mental state going into today's session?"></textarea>
+      </div>
+      <div class="modal-section">
+        <div class="modal-label">Post-Session — Did you follow your rules?</div>
+        <textarea class="modal-textarea" id="j-post" placeholder="Debrief: what worked, what pulled you off-plan?"></textarea>
+      </div>
+      <div class="modal-section">
+        <div class="modal-label">Psych Scores</div>
+        <div class="modal-score-row">
+          <div class="modal-score-label">Discipline</div>
+          <input class="modal-score-input" type="range" min="0" max="100" value="75" id="s-discipline" oninput="document.getElementById('sv-discipline').textContent=this.value" />
+          <div class="modal-score-val" id="sv-discipline">75</div>
+        </div>
+        <div class="modal-score-row">
+          <div class="modal-score-label">Patience</div>
+          <input class="modal-score-input" type="range" min="0" max="100" value="75" id="s-patience" oninput="document.getElementById('sv-patience').textContent=this.value" />
+          <div class="modal-score-val" id="sv-patience">75</div>
+        </div>
+        <div class="modal-score-row">
+          <div class="modal-score-label">Emotional Control</div>
+          <input class="modal-score-input" type="range" min="0" max="100" value="75" id="s-emotion" oninput="document.getElementById('sv-emotion').textContent=this.value" />
+          <div class="modal-score-val" id="sv-emotion">75</div>
+        </div>
+        <div class="modal-score-row">
+          <div class="modal-score-label">Rule Adherence</div>
+          <input class="modal-score-input" type="range" min="0" max="100" value="75" id="s-rules" oninput="document.getElementById('sv-rules').textContent=this.value" />
+          <div class="modal-score-val" id="sv-rules">75</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeJournalModal()">Cancel</button>
+      <button class="btn-save" onclick="saveJournalEntry()">Save Entry</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+  // ══════════════════════════════════════════
+  // SUPABASE CONFIG — swap these in when ready
+  // ══════════════════════════════════════════
+  const SUPABASE_URL  = 'YOUR_SUPABASE_URL';
+  const SUPABASE_ANON = 'YOUR_SUPABASE_ANON_KEY';
+  // Admin emails — add both of yours here
+  const ADMIN_EMAILS  = ['mentalmods6@gmail.com', 'brandon@email.com'];
+
+
+  const DEMO_MODE = (SUPABASE_URL === 'YOUR_SUPABASE_URL');
+  const sb = DEMO_MODE ? null : supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  let currentUser = null;
+  let isAdmin     = false;
+  let journalData = [];
+  let announcements = [];
+
+  // ── Date helpers ──
+  const today = new Date();
+  document.getElementById('today-date').textContent =
+    today.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+  document.getElementById('j-date').value = today.toISOString().split('T')[0];
+
+  // ── Auth tab switch ──
+  function switchTab(tab) {
+    document.getElementById('tab-login').style.display  = tab === 'login'  ? 'block' : 'none';
+    document.getElementById('tab-signup').style.display = tab === 'signup' ? 'block' : 'none';
+    document.querySelectorAll('.auth-tab').forEach((t, i) => {
+      t.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'signup'));
+    });
+  }
+
+  // ── Login ──
+  async function handleLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const pass  = document.getElementById('login-password').value;
+    const btn   = document.getElementById('login-btn');
+    const msg   = document.getElementById('login-msg');
+    if (!email || !pass) { showAuthMsg(msg, 'Please fill in all fields.', 'error'); return; }
+    btn.disabled = true; btn.textContent = 'Signing in...';
+    if (DEMO_MODE) {
+      // Demo login — any email/password works
+      await initApp({ email: email, user_metadata: { full_name: email.split('@')[0] }, id: 'demo-user' });
+      return;
+    }
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if (error) {
+      showAuthMsg(msg, error.message, 'error');
+      btn.disabled = false; btn.textContent = 'Sign In';
+    } else {
+      await initApp(data.user);
+    }
+  }
+
+  // ── Signup ──
+  async function handleSignup() {
+    const name  = document.getElementById('signup-name').value.trim();
+    const email = document.getElementById('signup-email').value.trim();
+    const pass  = document.getElementById('signup-password').value;
+    const btn   = document.getElementById('signup-btn');
+    const msg   = document.getElementById('signup-msg');
+    if (!name || !email || !pass) { showAuthMsg(msg, 'Please fill in all fields.', 'error'); return; }
+    if (pass.length < 8) { showAuthMsg(msg, 'Password must be at least 8 characters.', 'error'); return; }
+    btn.disabled = true; btn.textContent = 'Creating account...';
+    if (DEMO_MODE) {
+      showAuthMsg(msg, '⚠ Connect Supabase to enable real accounts. Use Sign In to try the demo.', 'error');
+      btn.disabled = false; btn.textContent = 'Create Account';
+      return;
+    }
+    const { error } = await sb.auth.signUp({ email, password: pass, options: { data: { full_name: name } } });
+    if (error) {
+      showAuthMsg(msg, error.message, 'error');
+      btn.disabled = false; btn.textContent = 'Create Account';
+    } else {
+      showAuthMsg(msg, '✓ Check your email for a verification link, then sign in.', 'success');
+      btn.disabled = false; btn.textContent = 'Create Account';
+    }
+  }
+
+  // ── Sign out ──
+  async function handleSignout() {
+    if (!DEMO_MODE) await sb.auth.signOut();
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('auth-screen').style.display = 'grid';
+    currentUser = null; isAdmin = false;
+  }
+
+  // ── Init app after login ──
+  async function initApp(user) {
+    currentUser = user;
+    isAdmin = ADMIN_EMAILS.includes(user.email);
+    const name = user.user_metadata?.full_name || user.email.split('@')[0];
+    const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
+
+    document.getElementById('user-name').textContent    = name;
+    document.getElementById('user-role').textContent    = isAdmin ? 'Admin' : 'Member';
+    document.getElementById('user-avatar').textContent  = initials;
+    document.getElementById('greeting-name').textContent = name.split(' ')[0];
+
+    if (isAdmin) {
+      document.getElementById('admin-nav-section').style.display = 'block';
+      loadAdminData();
+    }
+
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+
+    await loadJournal();
+    await loadAnnouncements();
+    updateOverview();
+  }
+
+  // ── Load journal entries ──
+  async function loadJournal() {
+    if (SUPABASE_URL === 'YOUR_SUPABASE_URL') { renderJournalDemo(); return; }
+    const { data, error } = await sb.from('journal_entries')
+      .select('*').eq('user_id', currentUser.id).order('entry_date', { ascending: false });
+    if (!error && data) { journalData = data; renderJournal(); updateOverview(); }
+  }
+
+  function renderJournalDemo() {
+    journalData = [
+      { id:1, entry_date:'2026-06-07', mood:'focused', pre_session:'Feeling locked in. Had a solid night, mind is clear.', post_session:'Stuck to my one setup. No revenge trades. Clean session.', score_discipline:92, score_patience:80, score_emotion:88, score_rules:95 },
+      { id:2, entry_date:'2026-06-06', mood:'anxious', pre_session:'A little on edge after yesterday. Going to size down.', post_session:'Got shaken out early but recovered. Emotional control needs work.', score_discipline:70, score_patience:65, score_emotion:60, score_rules:78 },
+    ];
+    renderJournal(); updateOverview();
+  }
+
+  function renderJournal() {
+    const list = document.getElementById('journal-list');
+    if (!journalData.length) {
+      list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📓</div><p>No entries yet. Start logging to build your edge.</p></div>';
+      return;
+    }
+    list.innerHTML = journalData.map(e => `
+      <div class="journal-entry">
+        <div class="je-header">
+          <div class="je-date">${formatDate(e.entry_date)}</div>
+          <span class="je-mood ${e.mood}">${cap(e.mood)}</span>
+        </div>
+        <div class="je-title">${formatDate(e.entry_date)} Session</div>
+        <div class="je-preview">${e.post_session?.slice(0,120) || e.pre_session?.slice(0,120)}...</div>
+        <div class="je-scores">
+          <div class="je-score">Discipline <span>${e.score_discipline}</span></div>
+          <div class="je-score">Patience <span>${e.score_patience}</span></div>
+          <div class="je-score">Emotion <span>${e.score_emotion}</span></div>
+          <div class="je-score">Rules <span>${e.score_rules}</span></div>
+        </div>
+      </div>`).join('');
+  }
+
+  // ── Save journal entry ──
+  async function saveJournalEntry() {
+    const entry = {
+      user_id:          currentUser?.id || 'demo',
+      entry_date:       document.getElementById('j-date').value,
+      mood:             document.getElementById('j-mood').value,
+      pre_session:      document.getElementById('j-pre').value,
+      post_session:     document.getElementById('j-post').value,
+      score_discipline: parseInt(document.getElementById('s-discipline').value),
+      score_patience:   parseInt(document.getElementById('s-patience').value),
+      score_emotion:    parseInt(document.getElementById('s-emotion').value),
+      score_rules:      parseInt(document.getElementById('s-rules').value),
+    };
+    if (!entry.pre_session && !entry.post_session) { showToast('Add at least a pre or post session note.'); return; }
+
+    if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+      const { error } = await sb.from('journal_entries').insert(entry);
+      if (error) { showToast('Error saving entry.'); return; }
+    } else {
+      journalData.unshift({ ...entry, id: Date.now() });
+    }
+    closeJournalModal(); renderJournal(); updateOverview();
+    showToast('✓ Entry saved.');
+  }
+
+  // ── Load announcements ──
+  async function loadAnnouncements() {
+    if (SUPABASE_URL === 'YOUR_SUPABASE_URL') { renderAnnouncementsDemo(); return; }
+    const { data, error } = await sb.from('announcements').select('*').order('created_at', { ascending: false });
+    if (!error && data) { announcements = data; renderAnnouncements(); }
+  }
+
+  function renderAnnouncementsDemo() {
+    announcements = [
+      { id:1, title:'Welcome to Mental Mods Academy', type:'update', author:'Mental Mods Team', body:"We're officially live. Thank you for being early.", created_at: new Date().toISOString() },
+    ];
+    renderAnnouncements();
+  }
+
+  function renderAnnouncements() {
+    const typeMap = {
+      update:  { label:'Platform Update', stripe:'gold',  cls:'type-update'  },
+      session: { label:'Live Session',    stripe:'green', cls:'type-session'  },
+      alert:   { label:'Alert',           stripe:'red',   cls:'type-alert'    },
+    };
+    const colorMap = { gold:'#c9973a', green:'#3a6644', red:'#8b3a2a' };
+
+    // Full page list
+    const list = document.getElementById('announcements-list');
+    if (!announcements.length) {
+      list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📢</div><p>No announcements yet.</p></div>';
+    } else {
+      list.innerHTML = announcements.map(a => {
+        const t = typeMap[a.type] || typeMap.update;
+        return `<div class="journal-entry" style="border-left:3px solid ${colorMap[t.stripe]}">
+          <div class="je-header">
+            <span style="font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:${colorMap[t.stripe]};border:1px solid ${colorMap[t.stripe]};padding:0.15rem 0.5rem;">${t.label}</span>
+            <div class="je-date">${formatDate(a.created_at?.split('T')[0] || '')}</div>
+          </div>
+          <div class="je-title">${a.title}</div>
+          <div class="je-preview">${a.body}</div>
+          <div class="je-scores"><div class="je-score">From <span>${a.author}</span></div></div>
+        </div>`;
+      }).join('');
+    }
+
+    // Overview feed
+    const feed = document.getElementById('overview-announcements');
+    if (!announcements.length) {
+      feed.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📢</div><p>No announcements yet.</p></div>';
+    } else {
+      feed.innerHTML = announcements.slice(0,3).map(a => `
+        <div class="announce-feed-item">
+          <div class="afi-dot"></div>
+          <div><div class="afi-title">${a.title}</div><div class="afi-meta">${a.author} · ${formatDate(a.created_at?.split('T')[0] || '')}</div></div>
+        </div>`).join('');
+    }
+  }
+
+  // ── Post announcement (admin) ──
+  async function postAnnouncement() {
+    const title  = document.getElementById('a-title').value.trim();
+    const type   = document.getElementById('a-type').value;
+    const author = document.getElementById('a-author').value.trim() || 'Mental Mods Team';
+    const body   = document.getElementById('a-body').value.trim();
+    const msg    = document.getElementById('admin-announce-msg');
+    if (!title || !body) { showAdminMsg(msg, 'Please fill in title and message.', 'error'); return; }
+
+    const entry = { title, type, author, body };
+    if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+      const { error } = await sb.from('announcements').insert(entry);
+      if (error) { showAdminMsg(msg, 'Error posting.', 'error'); return; }
+    } else {
+      announcements.unshift({ ...entry, id: Date.now(), created_at: new Date().toISOString() });
+    }
+    renderAnnouncements();
+    document.getElementById('a-title').value = '';
+    document.getElementById('a-body').value  = '';
+    showAdminMsg(msg, '✓ Announcement posted.', 'success');
+    showToast('✓ Announcement live.');
+  }
+
+  // ── Update overview stats ──
+  function updateOverview() {
+    document.getElementById('kpi-entries').textContent = journalData.length;
+    document.getElementById('kpi-streak').textContent  = calcStreak();
+
+    if (journalData.length) {
+      const avg = Math.round(journalData.reduce((s,e) => s + e.score_discipline, 0) / journalData.length);
+      document.getElementById('kpi-discipline').textContent = avg;
+
+      const last = journalData[0];
+      document.getElementById('overview-psych').innerHTML = `
+        ${psychMeter('Discipline',      last.score_discipline)}
+        ${psychMeter('Patience',        last.score_patience)}
+        ${psychMeter('Emotional Control', last.score_emotion)}
+        ${psychMeter('Rule Adherence',  last.score_rules)}
+      `;
+    }
+
+    // Course progress (static for now)
+    document.getElementById('kpi-progress').textContent = '40%';
+  }
+
+  function psychMeter(label, val) {
+    return `<div class="psych-meter-row">
+      <div class="psych-meter-name">${label}</div>
+      <div class="psych-track"><div class="psych-fill" style="width:${val}%"></div></div>
+      <div class="psych-val">${val}</div>
+    </div>`;
+  }
+
+  function calcStreak() {
+    if (!journalData.length) return 0;
+    let streak = 1;
+    for (let i = 0; i < journalData.length - 1; i++) {
+      const a = new Date(journalData[i].entry_date);
+      const b = new Date(journalData[i+1].entry_date);
+      const diff = (a - b) / (1000*60*60*24);
+      if (diff === 1) streak++; else break;
+    }
+    return streak;
+  }
+
+  // ── Admin data ──
+  async function loadAdminData() {
+    if (SUPABASE_URL === 'YOUR_SUPABASE_URL') {
+      document.getElementById('admin-member-count').textContent = '—';
+      document.getElementById('admin-entry-count').textContent  = '—';
+      document.getElementById('member-list').innerHTML = '<div class="empty-state" style="padding:1rem 0;"><p>Connect Supabase to see members.</p></div>';
+      return;
+    }
+    const { data: users } = await sb.from('profiles').select('id, email, created_at').order('created_at', { ascending: false });
+    const { count }       = await sb.from('journal_entries').select('*', { count:'exact', head:true });
+    if (users) {
+      document.getElementById('admin-member-count').textContent = users.length;
+      document.getElementById('admin-entry-count').textContent  = count || 0;
+      document.getElementById('member-list').innerHTML = users.slice(0,10).map(u => `
+        <div class="member-row">
+          <div class="member-av">${(u.email||'?')[0].toUpperCase()}</div>
+          <div class="member-email">${u.email}</div>
+          <div class="member-joined">${formatDate(u.created_at?.split('T')[0])}</div>
+        </div>`).join('');
+    }
+  }
+
+  // ── Navigation ──
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    event?.currentTarget?.classList.add('active');
+  }
+
+  // ── Modal ──
+  function openJournalModal() {
+    document.getElementById('journal-modal').classList.add('open');
+    document.getElementById('j-date').value = today.toISOString().split('T')[0];
+  }
+  function closeJournalModal() {
+    document.getElementById('journal-modal').classList.remove('open');
+  }
+
+  // ── Helpers ──
+  function formatDate(str) {
+    if (!str) return '';
+    const d = new Date(str + 'T12:00:00');
+    return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  }
+  function cap(s) { return s ? s[0].toUpperCase() + s.slice(1) : ''; }
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+  function showAuthMsg(el, msg, type) {
+    el.textContent = msg; el.className = 'auth-msg ' + type; el.style.display = 'block';
+  }
+  function showAdminMsg(el, msg, type) {
+    el.textContent = msg; el.className = 'admin-msg ' + type; el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 3000);
+  }
+
+  // ── Check existing session on load ──
+  (async () => {
+    if (DEMO_MODE) {
+      // Demo mode — show login screen with demo login button
+      document.getElementById('demo-banner').style.display = 'block';
+      return;
+    }
+    const { data: { session } } = await sb.auth.getSession();
+    if (session?.user) await initApp(session.user);
+  })();
+</script>
+</body>
+</html>
